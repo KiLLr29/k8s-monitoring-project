@@ -5,7 +5,7 @@ yc_token  = "y0__xDb_ZbdARjB3RMgn7X4pxQwicnKkwgUj_I2ekdzgPosfG6eHWzcPIJTWA"
 service_account_id       = "ajencc7vc5in0mkkuaps"
 node_service_account_id  = "ajencc7vc5in0mkkuaps"
 
-zone        = "ru-central1-a"
+zone        = "ru-central1-"
 network_name = "otus-vpc"
 subnet_name  = "otus-subnet"
 

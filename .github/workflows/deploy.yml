@@ -1,9 +1,7 @@
 name: Deploy Kubernetes Project
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:   # запуск вручную через Actions
 
 jobs:
   terraform:
@@ -23,6 +21,11 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve -var-file="terraform.tfvars"
+
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "${HOME}/yandex-cloud/bin" >> $GITHUB_PATH
 
       - name: Save kubeconfig
         run: |

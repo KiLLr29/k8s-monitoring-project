@@ -1,0 +1,30 @@
+name: Destroy Yandex Cloud Infrastructure
+
+on:
+  workflow_dispatch:   # запуск вручную из вкладки Actions
+
+jobs:
+  terraform-destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Init Terraform
+        working-directory: infra/terraform
+        run: terraform init
+
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "${HOME}/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Terraform Destroy
+        working-directory: infra/terraform
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+        run: terraform destroy -auto-approve -var-file="terraform.tfvars"
