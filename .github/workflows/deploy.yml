@@ -29,10 +29,15 @@ jobs:
 
       - name: Save kubeconfig
         run: |
+          yc config set token $YC_TOKEN
+          yc config set cloud-id $YC_CLOUD_ID
+          yc config set folder-id $YC_FOLDER_ID
           yc managed-kubernetes cluster get-credentials otus-k8s-cluster \
             --external --force --kubeconfig kubeconfig
         env:
-          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
         continue-on-error: false
 
       - name: Upload kubeconfig artifact
