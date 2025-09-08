@@ -17,7 +17,7 @@ jobs:
       - name: Init and Apply Terraform
         working-directory: infra/terraform
         env:
-          TF_VAR_yc_token:: ${{ secrets.YC_TOKEN }}
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
         run: |
           terraform init
           terraform apply -auto-approve -var-file="terraform.tfvars"
@@ -32,7 +32,7 @@ jobs:
           yc managed-kubernetes cluster get-credentials otus-k8s-cluster \
             --external --force --kubeconfig kubeconfig
         env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
         continue-on-error: false
 
       - name: Upload kubeconfig artifact
