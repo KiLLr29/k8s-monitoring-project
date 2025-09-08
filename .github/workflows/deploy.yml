@@ -1,0 +1,68 @@
+name: Deploy Kubernetes Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Init and Apply Terraform
+        working-directory: infra/terraform
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+        run: |
+          terraform init
+          terraform apply -auto-approve -var-file="terraform.tfvars"
+
+      - name: Save kubeconfig
+        run: |
+          yc managed-kubernetes cluster get-credentials otus-k8s-cluster \
+            --external --force --kubeconfig kubeconfig
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+        continue-on-error: false
+
+      - name: Upload kubeconfig artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubeconfig
+          path: kubeconfig
+
+  deploy:
+    name: Deploy Kubernetes Resources
+    runs-on: ubuntu-latest
+    needs: terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download kubeconfig
+        uses: actions/download-artifact@v4
+        with:
+          name: kubeconfig
+          path: .
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.31.0'
+
+      - name: Apply Kubernetes manifests
+        env:
+          KUBECONFIG: ./kubeconfig
+        run: |
+          kubectl apply -f k8s/base
+          kubectl apply -f k8s/monitoring
+          kubectl apply -f k8s/logging
+          kubectl apply -f k8s/cms
+          kubectl apply -f k8s/loadtesting
