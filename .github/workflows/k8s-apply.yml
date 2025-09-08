@@ -1,0 +1,43 @@
+name: Apply Kubernetes Manifests
+
+on:
+  workflow_dispatch:   # запуск вручную
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "${HOME}/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Save kubeconfig
+        run: |
+          yc config set token $YC_TOKEN
+          yc config set cloud-id $YC_CLOUD_ID
+          yc config set folder-id $YC_FOLDER_ID
+          yc managed-kubernetes cluster get-credentials otus-k8s-cluster \
+            --external --force --kubeconfig kubeconfig
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.31.0'
+
+      - name: Apply manifests
+        env:
+          KUBECONFIG: ./kubeconfig
+        run: |
+          kubectl apply -f k8s/base
+          kubectl apply -f k8s/monitoring
+          kubectl apply -f k8s/logging
+          kubectl apply -f k8s/cms
+          kubectl apply -f k8s/loadtesting
