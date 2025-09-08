@@ -36,8 +36,10 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
         run: |
-          kubectl apply -f k8s/base
-          kubectl apply -f k8s/monitoring
-          kubectl apply -f k8s/logging
-          kubectl apply -f k8s/cms
-          kubectl apply -f k8s/loadtesting
+          kubectl apply -R -f k8s/
+          
+      - name: Check pods
+        env:
+          KUBECONFIG: ./kubeconfig
+        run: kubectl get pods -A -o wide
+
