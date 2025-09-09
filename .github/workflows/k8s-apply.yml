@@ -1,7 +1,7 @@
 name: Apply Kubernetes Manifests
 
 on:
-  workflow_dispatch:   # запуск вручную
+  workflow_call:   # теперь его можно вызывать из других workflows
 
 jobs:
   apply:
