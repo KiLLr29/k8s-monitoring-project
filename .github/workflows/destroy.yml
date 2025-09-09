@@ -29,7 +29,7 @@ jobs:
 
       - name: Fallback delete Admin VM by name (yc)
         env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
         run: |
           set -e
           export PATH="${HOME}/yandex-cloud/bin:${PATH}"
