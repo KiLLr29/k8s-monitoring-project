@@ -8,8 +8,7 @@ data "yandex_vpc_network" "net" {
 }
 
 data "yandex_vpc_subnet" "subnet" {
-  name       = var.subnet_name
-  network_id = data.yandex_vpc_network.net.id
+  name = var.subnet_name
 }
 
 # Base image for admin VM
@@ -61,4 +60,3 @@ resource "yandex_compute_instance" "admin" {
     CLOUDCFG
   }
 }
-
