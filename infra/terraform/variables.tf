@@ -66,3 +66,40 @@ variable "node_memory" {
   default     = 4
 }
 
+# Admin VM (optional)
+variable "create_admin_vm" {
+  description = "Создавать отдельную админ-ВМ для работы с кластером"
+  type        = bool
+  default     = false
+}
+
+variable "admin_vm_name" {
+  description = "Имя админ-ВМ"
+  type        = string
+  default     = "kube-admin"
+}
+
+variable "admin_vm_cores" {
+  description = "vCPU админ-ВМ"
+  type        = number
+  default     = 2
+}
+
+variable "admin_vm_memory" {
+  description = "Память админ-ВМ (ГБ)"
+  type        = number
+  default     = 4
+}
+
+variable "admin_vm_disk" {
+  description = "Размер диска админ-ВМ (ГБ)"
+  type        = number
+  default     = 20
+}
+
+variable "admin_ssh_public_key" {
+  description = "Публичный SSH-ключ для пользователя ubuntu (ssh-ed25519/ssh-rsa ...)"
+  type        = string
+  default     = ""
+}
+

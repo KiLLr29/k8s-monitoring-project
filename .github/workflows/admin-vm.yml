@@ -1,0 +1,58 @@
+name: Provision Admin VM
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_public_key:
+        description: "SSH public key for user ubuntu (ssh-ed25519/ssh-rsa)"
+        required: true
+        type: string
+
+jobs:
+  admin-vm:
+    name: Terraform Apply (Admin VM)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
+        run: terraform init
+
+      - name: Terraform Apply (create admin VM)
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
+        run: |
+          terraform apply -auto-approve \
+            -var-file="terraform.tfvars" \
+            -var="create_admin_vm=true" \
+            -var="admin_ssh_public_key=${{ inputs.ssh_public_key }}"
+
+      - name: Read outputs
+        id: tf_outputs
+        run: |
+          echo "public_ip=$(terraform output -raw admin_vm_public_ip || true)" >> $GITHUB_OUTPUT
+          echo "private_ip=$(terraform output -raw admin_vm_private_ip || true)" >> $GITHUB_OUTPUT
+
+      - name: Show summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pub = core.getInput('public_ip');
+            const priv = core.getInput('private_ip');
+            let md = `## Admin VM created\n`;
+            md += `- Public IP: ${pub || 'n/a'}\n`;
+            md += `- Private IP: ${priv || 'n/a'}\n`;
+            core.summary.addRaw(md).write();
+        env:
+          public_ip: ${{ steps.tf_outputs.outputs.public_ip }}
+          private_ip: ${{ steps.tf_outputs.outputs.private_ip }}
+
