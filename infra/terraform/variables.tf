@@ -100,6 +100,6 @@ variable "admin_vm_disk" {
 variable "admin_ssh_public_key" {
   description = "Публичный SSH-ключ для пользователя ubuntu (ssh-ed25519/ssh-rsa ...)"
   type        = string
-  default     = "AAAAB3NzaC1yc2EAAAADAQABAAABAQDUFxFeTcznPfFb6ACGZLwl1viN4QV3UDeZpwnrR0bLGm0WqJkIOtZfI270UjE5vyX58HV5gY92e1yFY4Ai2Mk+057H1gAFm38vdNAinraPIXJHTM/y5hJiPC/bM88YRbLA1tyGh2QyvWGzePyQstbbXaP0W9LqqYTXnmY2h3iOVWc6Jq+7H+GN+7lWob3WcpKcrTL8b/igijp/3xvBr6Rz82LQje+1bHkagD9EezrQ6fq6kY/q2eCQ+8QBoheGYpwEHhbrJxJTkpa4Z1DQ+R79t0F55vRSLmOpcnlyzJSe4Vr4OYGkw9hAbWbIX5e0ICe+TYWRqTmYhX9+01ATUi/p"
+  default     = ""
 }
 

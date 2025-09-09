@@ -59,3 +59,8 @@ variable "admin_ssh_public_key" {
   type        = string
 }
 
+variable "cluster_name" {
+  description = "Имя существующего Managed Kubernetes кластера"
+  type        = string
+  default     = "otus-k8s-cluster"
+}

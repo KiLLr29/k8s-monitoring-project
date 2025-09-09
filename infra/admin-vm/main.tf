@@ -57,6 +57,13 @@ resource "yandex_compute_instance" "admin" {
         - bash -lc 'chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg'
         - bash -lc 'echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" > /etc/apt/sources.list.d/kubernetes.list'
         - bash -lc 'apt-get update && apt-get install -y kubectl && apt-get clean'
+        # Configure yc and kubeconfig for ubuntu
+        - sudo -u ubuntu -H bash -lc "yc config set token '${var.yc_token}'"
+        - sudo -u ubuntu -H bash -lc "yc config set cloud-id '${var.cloud_id}'"
+        - sudo -u ubuntu -H bash -lc "yc config set folder-id '${var.folder_id}'"
+        - sudo -u ubuntu -H bash -lc "yc managed-kubernetes cluster get-credentials ${var.cluster_name} --external --force --kubeconfig /home/ubuntu/kubeconfig || true"
+        - sudo -u ubuntu -H bash -lc "grep -q KUBECONFIG ~/.profile || echo 'export KUBECONFIG=$HOME/kubeconfig' >> ~/.profile"
+        - sudo -u ubuntu -H bash -lc "kubectl version --client && kubectl get nodes --kubeconfig /home/ubuntu/kubeconfig || true"
     CLOUDCFG
   }
 }

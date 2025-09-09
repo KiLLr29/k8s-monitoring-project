@@ -45,8 +45,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pub = core.getInput('public_ip');
-            const priv = core.getInput('private_ip');
+            const pub = process.env.public_ip || '';
+            const priv = process.env.private_ip || '';
             let md = `## Admin VM created\n`;
             md += `- Public IP: ${pub || 'n/a'}\n`;
             md += `- Private IP: ${priv || 'n/a'}\n`;
