@@ -14,17 +14,48 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Init Terraform
-        working-directory: infra/terraform
-        run: terraform init
+      - name: Destroy Admin VM (Terraform)
+        working-directory: infra/admin-vm
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
+        run: |
+          terraform init
+          terraform destroy -auto-approve -var-file="../terraform/terraform.tfvars" || true
 
       - name: Install Yandex Cloud CLI
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           echo "${HOME}/yandex-cloud/bin" >> $GITHUB_PATH
 
-      - name: Terraform Destroy
-        working-directory: infra/terraform
+      - name: Fallback delete Admin VM by name (yc)
         env:
           YC_TOKEN: ${{ secrets.YC_TOKEN }}
+        run: |
+          set -e
+          export PATH="${HOME}/yandex-cloud/bin:${PATH}"
+          # Parse vars from terraform.tfvars
+          CLOUD_ID=$(awk -F '"' '/^cloud_id/ {print $2}' infra/terraform/terraform.tfvars)
+          FOLDER_ID=$(awk -F '"' '/^folder_id/ {print $2}' infra/terraform/terraform.tfvars)
+          ZONE=$(awk -F '"' '/^zone/ {print $2}' infra/terraform/terraform.tfvars)
+          ADMIN_VM_NAME=$(awk -F '"' '/^admin_vm_name/ {print $2}' infra/terraform/terraform.tfvars || true)
+          if [ -z "$ADMIN_VM_NAME" ]; then ADMIN_VM_NAME="kube-admin"; fi
+          yc config set token "$YC_TOKEN"
+          yc config set cloud-id "$CLOUD_ID"
+          yc config set folder-id "$FOLDER_ID"
+          # Try to delete instance if exists
+          if yc compute instance list --format json | jq -e ".[] | select(.name==\"$ADMIN_VM_NAME\")" > /dev/null; then
+            echo "Deleting admin VM $ADMIN_VM_NAME"
+            yc compute instance delete --name "$ADMIN_VM_NAME" --zone "$ZONE" --async || true
+          else
+            echo "Admin VM $ADMIN_VM_NAME not found; skipping"
+          fi
+
+      - name: Init Terraform (infra)
+        working-directory: infra/terraform
+        run: terraform init
+
+      - name: Terraform Destroy (infra)
+        working-directory: infra/terraform
+        env:
+          TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
         run: terraform destroy -auto-approve -var-file="terraform.tfvars"
