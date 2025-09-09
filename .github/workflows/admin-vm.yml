@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: infra/terraform
+        working-directory: infra/admin-vm
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,8 +32,7 @@ jobs:
           TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
         run: |
           terraform apply -auto-approve \
-            -var-file="terraform.tfvars" \
-            -var="create_admin_vm=true" \
+            -var-file="../terraform/terraform.tfvars" \
             -var="admin_ssh_public_key=${{ inputs.ssh_public_key }}"
 
       - name: Read outputs
@@ -55,4 +54,3 @@ jobs:
         env:
           public_ip: ${{ steps.tf_outputs.outputs.public_ip }}
           private_ip: ${{ steps.tf_outputs.outputs.private_ip }}
-
