@@ -72,6 +72,18 @@ data:
             source_labels: [__meta_kubernetes_namespace]
             regex: monitoring
 
+      # postgres-exporter in cms namespace
+      - job_name: 'postgres-exporter'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: keep
+            source_labels: [__meta_kubernetes_service_name]
+            regex: postgres-exporter
+          - action: keep
+            source_labels: [__meta_kubernetes_namespace]
+            regex: cms
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -108,4 +120,3 @@ spec:
             items:
               - key: prometheus.yml
                 path: prometheus.yml
-
