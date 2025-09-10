@@ -29,19 +29,19 @@ data:
           "targets": [{"expr": "sum by (instance)(up{job=\"node-exporter\"})", "refId": "A"}]
         },
         {
-          "type": "timeSeries",
+          "type": "timeseries",
           "title": "CPU usage (per node)",
           "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
           "targets": [{"expr": "sum by (instance)(rate(node_cpu_seconds_total{mode!=\"idle\"}[5m]))", "refId": "A"}]
         },
         {
-          "type": "timeSeries",
+          "type": "timeseries",
           "title": "Memory usage % (per node)",
           "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
           "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "refId": "A"}]
         },
         {
-          "type": "timeSeries",
+          "type": "timeseries",
           "title": "Root FS usage % (per node)",
           "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
           "targets": [{"expr": "(node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|devtmpfs\"} - node_filesystem_free_bytes{mountpoint=\"/\",fstype!~\"tmpfs|devtmpfs\"}) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|devtmpfs\"} * 100", "refId": "A"}]
@@ -77,13 +77,13 @@ data:
           "targets": [{"expr": "sum(kube_deployment_status_replicas_available)", "refId": "A"}]
         },
         {
-          "type": "timeSeries",
+          "type": "timeseries",
           "title": "API server up",
           "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6},
           "targets": [{"expr": "up{job=\"apiserver\"}", "refId": "A"}]
         },
         {
-          "type": "timeSeries",
+          "type": "timeseries",
           "title": "Cluster CPU usage",
           "gridPos": {"x": 0, "y": 10, "w": 12, "h": 8},
           "targets": [{"expr": "sum(rate(node_cpu_seconds_total{mode!=\"idle\"}[5m]))", "refId": "A"}]
