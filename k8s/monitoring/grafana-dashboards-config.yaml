@@ -25,3 +25,11 @@ data:
         updateIntervalSeconds: 30
         options:
           path: /var/lib/grafana/dashboards-community
+      - name: 'user'
+        orgId: 1
+        folder: 'User'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards-user

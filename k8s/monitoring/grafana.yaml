@@ -34,6 +34,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards
             - name: grafana-dashboards-community
               mountPath: /var/lib/grafana/dashboards-community
+            - name: grafana-dashboards-user
+              mountPath: /var/lib/grafana/dashboards-user
       volumes:
         - name: grafana-storage
           emptyDir: {}
@@ -49,6 +51,9 @@ spec:
         - name: grafana-dashboards-community
           configMap:
             name: grafana-dashboards-community
+        - name: grafana-dashboards-user
+          configMap:
+            name: grafana-dashboards-user
 ---
 apiVersion: v1
 kind: Service

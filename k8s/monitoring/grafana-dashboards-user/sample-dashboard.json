@@ -1,0 +1,18 @@
+{
+  "uid": "user-sample",
+  "title": "User Sample Dashboard",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "time": {"from": "now-1h", "to": "now"},
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Targets up",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum by (job)(up)", "refId": "A"}]
+    }
+  ]
+}
+

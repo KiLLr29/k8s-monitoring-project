@@ -37,6 +37,8 @@ jobs:
           KUBECONFIG: ./kubeconfig
         run: |
           kubectl apply -R -f k8s/
+          # Apply user Grafana dashboards (kustomize)
+          kubectl apply -k k8s/monitoring/grafana-dashboards-user
           
       - name: Check pods
         env:
