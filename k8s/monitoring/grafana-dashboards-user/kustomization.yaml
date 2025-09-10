@@ -8,5 +8,4 @@ generatorOptions:
 configMapGenerator:
   - name: grafana-dashboards-user
     files:
-      - sample-dashboard.json
-
+      - dashboards
