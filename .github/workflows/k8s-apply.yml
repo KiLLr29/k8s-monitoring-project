@@ -36,7 +36,10 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
         run: |
-          kubectl apply -R -f k8s/
+          # Apply all manifests except user dashboards kustomize dir
+          find k8s -type f \( -name '*.yaml' -o -name '*.yml' -o -name '*.json' \) \
+            ! -path 'k8s/monitoring/grafana-dashboards-user/*' -print0 | \
+            xargs -0 -n1 kubectl apply -f
           # Apply user Grafana dashboards (kustomize)
           kubectl apply -k k8s/monitoring/grafana-dashboards-user
           
