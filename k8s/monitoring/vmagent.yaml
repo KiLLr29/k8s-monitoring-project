@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vmagent
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmagent-discovery
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/metrics", "services", "endpoints", "pods", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vmagent-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vmagent-discovery
+subjects:
+  - kind: ServiceAccount
+    name: vmagent
+    namespace: monitoring
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmagent-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+
+    scrape_configs:
+      # Kubernetes API server metrics
+      - job_name: 'apiserver'
+        scheme: https
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['kubernetes.default.svc:443']
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+      # kube-state-metrics service
+      - job_name: 'kube-state-metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: keep
+            source_labels: [__meta_kubernetes_service_name]
+            regex: kube-state-metrics
+          - action: keep
+            source_labels: [__meta_kubernetes_namespace]
+            regex: monitoring
+
+      # node-exporter on every node
+      - job_name: 'node-exporter'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: keep
+            source_labels: [__meta_kubernetes_service_name]
+            regex: node-exporter
+          - action: keep
+            source_labels: [__meta_kubernetes_namespace]
+            regex: monitoring
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmagent
+  namespace: monitoring
+  labels:
+    app: vmagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vmagent
+  template:
+    metadata:
+      labels:
+        app: vmagent
+    spec:
+      serviceAccountName: vmagent
+      containers:
+        - name: vmagent
+          image: victoriametrics/vmagent:latest
+          args:
+            - "-promscrape.config=/etc/vmagent/config/prometheus.yml"
+            - "-remoteWrite.url=http://victoriametrics.monitoring.svc.cluster.local:8428/api/v1/write"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vmagent/config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: vmagent-config
+            items:
+              - key: prometheus.yml
+                path: prometheus.yml
+
