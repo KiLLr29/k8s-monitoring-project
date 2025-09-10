@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-community
+  namespace: monitoring
+  labels:
+    app: grafana
+data:
+  gnet-1860.json: |
+    {
+      "uid": "gnet-1860",
+      "title": "Node Exporter Quick (Embedded)",
+      "schemaVersion": 39,
+      "version": 1,
+      "editable": true,
+      "time": {"from": "now-1h", "to": "now"},
+      "refresh": "30s",
+      "panels": [
+        {"type":"stat","title":"Nodes","gridPos":{"x":0,"y":0,"w":4,"h":4},
+         "targets":[{"expr":"count(kube_node_info)","refId":"A"}]},
+        {"type":"stat","title":"node-exporter up","gridPos":{"x":4,"y":0,"w":6,"h":4},
+         "targets":[{"expr":"sum by (instance)(up{job=\"node-exporter\"})","refId":"A"}]},
+        {"type":"timeseries","title":"CPU usage (per node)","gridPos":{"x":0,"y":4,"w":12,"h":8},
+         "targets":[{"expr":"sum by (instance)(rate(node_cpu_seconds_total{mode!=\\\"idle\\\"}[5m]))","refId":"A"}]},
+        {"type":"timeseries","title":"Memory usage % (per node)","gridPos":{"x":0,"y":12,"w":12,"h":8},
+         "targets":[{"expr":"(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100","refId":"A"}]},
+        {"type":"timeseries","title":"Root FS usage % (per node)","gridPos":{"x":0,"y":20,"w":12,"h":8},
+         "targets":[{"expr":"(node_filesystem_size_bytes{mountpoint=\\\"/\\\",fstype!~\\\"tmpfs|devtmpfs\\\"} - node_filesystem_free_bytes{mountpoint=\\\"/\\\",fstype!~\\\"tmpfs|devtmpfs\\\"}) / node_filesystem_size_bytes{mountpoint=\\\"/\\\",fstype!~\\\"tmpfs|devtmpfs\\\"} * 100","refId":"A"}]},
+        {"type":"timeseries","title":"Network RX/TX bytes/s","gridPos":{"x":0,"y":28,"w":12,"h":8},
+         "targets":[{"expr":"sum by (instance)(rate(node_network_receive_bytes_total[5m]))","refId":"A"},
+                      {"expr":"sum by (instance)(rate(node_network_transmit_bytes_total[5m]))","refId":"B"}]}
+      ]
+    }
+  gnet-6417.json: |
+    {
+      "uid": "gnet-6417",
+      "title": "Kubernetes Cluster Quick (Embedded)",
+      "schemaVersion": 39,
+      "version": 1,
+      "editable": true,
+      "time": {"from": "now-1h", "to": "now"},
+      "refresh": "30s",
+      "panels": [
+        {"type":"stat","title":"Nodes","gridPos":{"x":0,"y":0,"w":4,"h":4},
+         "targets":[{"expr":"count(kube_node_info)","refId":"A"}]},
+        {"type":"stat","title":"Namespaces","gridPos":{"x":4,"y":0,"w":4,"h":4},
+         "targets":[{"expr":"count(kube_namespace_labels)","refId":"A"}]},
+        {"type":"stat","title":"Pods (Running)","gridPos":{"x":8,"y":0,"w":4,"h":4},
+         "targets":[{"expr":"sum(kube_pod_status_phase{phase=\\\"Running\\\"})","refId":"A"}]},
+        {"type":"timeseries","title":"API server up","gridPos":{"x":0,"y":4,"w":12,"h":6},
+         "targets":[{"expr":"up{job=\\\"apiserver\\\"}","refId":"A"}]},
+        {"type":"timeseries","title":"Cluster CPU usage","gridPos":{"x":0,"y":10,"w":12,"h":8},
+         "targets":[{"expr":"sum(rate(node_cpu_seconds_total{mode!=\\\"idle\\\"}[5m]))","refId":"A"}]},
+        {"type":"timeseries","title":"Cluster Memory usage %","gridPos":{"x":0,"y":18,"w":12,"h":8},
+         "targets":[{"expr":"(1 - (sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes))) * 100","refId":"A"}]}
+      ]
+    }
+

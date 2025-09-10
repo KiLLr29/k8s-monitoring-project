@@ -13,27 +13,6 @@ spec:
       labels:
         app: grafana
     spec:
-      initContainers:
-        - name: download-community-dashboards
-          image: alpine:3.19
-          command:
-            - sh
-            - -exc
-            - |
-              apk add --no-cache curl jq
-              mkdir -p /dashboards
-              set -x
-              for ID in 1860 6417; do
-                INFO_URL="https://grafana.com/api/dashboards/${ID}"
-                REV=$(curl -fsSL "$INFO_URL" | jq -r '.revisions[-1].revision') || REV=""
-                if [ -n "$REV" ] && [ "$REV" != "null" ]; then
-                  curl -fsSL "https://grafana.com/api/dashboards/${ID}/revisions/${REV}/download" -o "/dashboards/gnet-${ID}.json" || true
-                fi
-              done
-              ls -l /dashboards || true
-          volumeMounts:
-            - name: grafana-dashboards-community
-              mountPath: /dashboards
       containers:
         - name: grafana
           image: grafana/grafana:10.2.3
@@ -68,7 +47,8 @@ spec:
           configMap:
             name: grafana-dashboards
         - name: grafana-dashboards-community
-          emptyDir: {}
+          configMap:
+            name: grafana-dashboards-community
 ---
 apiVersion: v1
 kind: Service
