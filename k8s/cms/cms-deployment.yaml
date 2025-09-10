@@ -31,6 +31,20 @@ spec:
       labels:
         app: drupal
     spec:
+      securityContext:
+        fsGroup: 33        # www-data
+      initContainers:
+        - name: init-perms
+          image: busybox:1.36
+          command: ['sh','-c']
+          args:
+            - |
+              mkdir -p /var/www/html/sites/default/files && \
+              chown -R 33:33 /var/www/html/sites/default
+          volumeMounts:
+            - name: drupal-data
+              mountPath: /var/www/html/sites/default
+              subPath: sites-default
       containers:
         - name: drupal
           image: drupal:10-apache
@@ -52,7 +66,8 @@ spec:
             periodSeconds: 20
           volumeMounts:
             - name: drupal-data
-              mountPath: /var/www/html
+              mountPath: /var/www/html/sites/default
+              subPath: sites-default
       volumes:
         - name: drupal-data
           persistentVolumeClaim:
