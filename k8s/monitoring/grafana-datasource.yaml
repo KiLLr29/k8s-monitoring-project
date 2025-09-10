@@ -14,4 +14,11 @@ data:
         access: proxy
         url: http://victoriametrics.monitoring.svc.cluster.local:8428
         isDefault: true
+      - name: VictoriaLogs
+        type: loki
+        access: proxy
+        url: http://victorialogs.logging.svc.cluster.local:9428
+        basicAuth: false
+        jsonData:
+          maxLines: 2000
 
