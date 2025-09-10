@@ -4,6 +4,28 @@ metadata:
   name: fluent-bit
   namespace: monitoring
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluent-bit-k8s-metadata
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluent-bit-k8s-metadata
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluent-bit-k8s-metadata
+subjects:
+  - kind: ServiceAccount
+    name: fluent-bit
+    namespace: monitoring
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -34,6 +56,12 @@ spec:
             - name: varlibdockercontainers
               mountPath: /var/lib/docker/containers
               readOnly: true
+            - name: config
+              mountPath: /fluent-bit/etc
+          env:
+            - name: FLB_LOG_LEVEL
+              value: info
+          args: ["-c", "/fluent-bit/etc/fluent-bit.conf"]
       volumes:
         - name: varlog
           hostPath:
@@ -41,4 +69,7 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
+        - name: config
+          configMap:
+            name: fluent-bit-config
 
