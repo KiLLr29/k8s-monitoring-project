@@ -17,4 +17,11 @@ data:
         updateIntervalSeconds: 30
         options:
           path: /var/lib/grafana/dashboards
-
+      - name: 'community'
+        orgId: 1
+        folder: 'Community'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards-community
